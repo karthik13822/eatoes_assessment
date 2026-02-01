@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState} from "react";
 import axios from "axios";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
@@ -10,15 +10,6 @@ export default function MenuPage() {
   const [category, setCategory] = useState("Main Course");
   const [search, setSearch] = useState("");
 
-  //Fetch Menu
-  const fetchMenu = async () => {
-    const res = await axios.get(`${API}/menu`);
-    setMenu(res.data);
-  };
-
-  useEffect(() => {
-    fetchMenu();
-  }, []);
 
   //Add Item
   const addItem = async () => {
@@ -30,33 +21,44 @@ export default function MenuPage() {
 
     setName("");
     setPrice("");
-    fetchMenu();
+    const res = await axios.get(`${API}/menu`);
+    setMenu(res.data);
+
   };
 
   //Toggle
   const toggle = async (id) => {
     await axios.patch(`${API}/menu/${id}/availability`);
-    fetchMenu();
+    const res = await axios.get(`${API}/menu`);
+    setMenu(res.data);
   };
 
-  //Search
-  const searchMenu = useCallback(async (q) => {
-    if (!q) {
-      fetchMenu();
-      return;
-    }
-
-    const res = await axios.get(`${API}/menu/search?q=${q}`);
-    setMenu(res.data);
-  },[search]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      searchMenu(search);
-    }, [searchMenu]);
 
-    return () => clearTimeout(timer);
-  }, [search]);
+  const fetchData = async () => {
+    try {
+
+      if (!search) {
+        const res = await axios.get(`${API}/menu`);
+        setMenu(res.data);
+      } else {
+        const res = await axios.get(
+          `${API}/menu/search?q=${search}`
+        );
+        setMenu(res.data);
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchData();
+
+}, [search]);
+
+
 
   return (
   <div>
