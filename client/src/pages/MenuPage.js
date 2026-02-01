@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
@@ -40,7 +40,7 @@ export default function MenuPage() {
   };
 
   //Search
-  const searchMenu = async (q) => {
+  const searchMenu = useCallback(async (q) => {
     if (!q) {
       fetchMenu();
       return;
@@ -48,12 +48,12 @@ export default function MenuPage() {
 
     const res = await axios.get(`${API}/menu/search?q=${q}`);
     setMenu(res.data);
-  };
+  },[search]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       searchMenu(search);
-    }, 300);
+    }, [searchMenu]);
 
     return () => clearTimeout(timer);
   }, [search]);
